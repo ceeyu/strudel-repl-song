@@ -1,0 +1,285 @@
+//Coldplay: Something Just Like This
+// Key: B minor
+// Tempo: 103 BPM
+// Time Signature: 4/4
+// 1 cycle = 1 bar
+setcpm(103/4)   //設定cycle per minute, 
+// ex: 在這份編曲中，我們「定義」1 cycle = 1 bar, 1 bar = 4 
+//103 BPM / 4 = 25.75 bars/min
+
+// ==========================================================
+// TRACK 1 - CHORDS
+// ==========================================================
+const chords = chord("<Gadd9 Asus Bm Asus>") //G + 9 = G B D + A,A是G的9th
+     .anchor("g4")
+     .voicing()  //根據 chord symbol 自動選擇實際音符配置，並盡量讓相鄰和弦的 voice leading 平順
+     .struct("x ~ x ~ x x ~ x")
+     .s("piano")
+     //.lpf(1800) // 把 chord 高頻削掉，讓 Vocal/Melody 有空間
+     .attack(.01) //突然到最大音量
+     //.decay(.2) // 最大音量往 sustain level 掉，大概花 0.2 秒
+     //.sustain(.15) // 掉下來之後只留下約15%level
+     .release(.45) //結束時自然消退
+     .gain(.3)
+
+// ==========================================================
+// TRACK 2 - DRUMS
+// ==========================================================
+
+const kick =   s("bd*4")
+   .gain(.8)
+   .duckorbit(2)
+   .duckattack(.18)
+   .duckdepth(.7)
+
+  
+const clap =   s("~ cp ~ cp")
+   .gain(.45)
+
+const hats =  s("hh oh hh  hh hh oh hh hh")
+     .velocity("1 .7 1 .45 1 .7 1 .45")//拍點強弱，velocity代表每個note被打得多大力(相對強弱)
+  //gain = 整條track的音量(整組 hi-hat 的總音量)
+  //       1   &   2   &   3   &   4   &
+  //Hat    x   x   x   x   x   x   x   x
+  //Vel    1  .7  1  .45  1  .7  1  .45
+  //     >       >       >       >  
+     .cut(1)
+     .gain(.18)
+  // Kick: 1 2 3 4
+  // Clap: - 2 - 4
+  //hi-hat:1 & 2 & 3 & 4 &
+
+// ==========================================================
+// TRACK 3 - BASS
+// ==========================================================
+const bass =   note(`
+    <
+       [g2 ~ g2 d3 ~ g3 d3 ~]
+       [a2 ~ a2 e3 ~ a3 e3 ~]
+       [b2 ~ b2 fs3 ~ b3 fs3 ~]
+       [a2 ~ a2 e3 ~ a3 e3 ~]
+    >
+   `)
+  //       1   &   2   &   3   &   4   &
+　//Bass   G   -   G   D   -   G↑  D   
+  //       1   &   2   &   3   &   4   &
+  //Bass   A   -   A   E   -   A↑  E   
+  //       1   &   2   &   3   &   4   &
+  //Bass   B   -   B   F#  -   B↑  F#  -
+     //.struct("x ~ x x ~ x ~ x")
+     .s("sawtooth")
+     .lpf(700)
+     .gain(.4)
+     .orbit(2) //每次打下去，把Orbit 2 的聲音壓低: Kick -> duck -> orbit 2 -> bass
+      //LPF = Low Pass Filter，用低頻通過削掉高音
+  // Bass: 用 .struct() 給 Bass 節奏
+  // Sawtooth 裡面有很多 harmonic overtones，很buzz, bright, rich
+  //1 & 2 &  3 &  4 &
+  //x ~ x x  ~ x  ~ x(Rhythm pattern)
+
+// ==========================================================
+// TRACK 4 - MELODY
+// ==========================================================
+
+const melodyA = n(`
+  <
+     [~ 5 6 5 2 1 2 5]
+     [~ 6 3 2 1 2 3 6]
+     [~ 4 2 1 0 1 2 4]
+     [~ 3 2 1 2 3 2 0]
+  >
+  `
+   )
+     .scale("B3:minor")
+     .velocity("0.6 .8 .65 .85 .55 .8 .7 .5") //動態，每顆音力度稍微不同，模擬拉弓強弱
+     .clip(".35 .8 .55 1.2 .45 .8 1.05 .55") //把 event duration 乘上指定 factor
+     // 音拉長一點，不要每顆都像短促 MIDI note
+     //.s("triangle")
+     .s("gm_violin")
+     //.lpf(2500)
+     .attack(.06)// 拉弓不是瞬間出聲，所以 attack 稍慢
+     .release(.38)// bow 停下來後保留一點尾巴
+     .gain(.30)
+
+  const melodyB = n(`
+  <
+     [~ 5 6 5 2 1 2 5]
+     [~ 6 3 2 1 2 3 6]
+     [~ 4 2 1 0 1 2 4]
+     [~ 3 2 1 0@2 3 2 0]  
+ >`
+  )
+     .scale("B3:minor")
+     .velocity("0.6 .8 .65 .85 .55 .8 .7 .5") //動態
+     .clip(".35 .8 .55 1.2 .45 .8 1.05 .55") //把 event duration 乘上指定 factor
+     //.s("triangle")
+     .s("gm_violin")
+     //.lpf(2500)
+     .attack(.06)
+     .release(.38)
+     .gain(.30)
+
+const fullMelody = arrange(
+    [4, melodyA],
+    [4,melodyB]
+  )
+
+// ==========================================================
+// TRACK 5 - STRINGS PAD
+// ==========================================================
+
+  const strings = chord("<Gadd9 Asus Bm Asus>")
+      .anchor("g4")
+      .voicing()
+
+      .s("gm_string_ensemble_1")  // 背景弦樂群，不是 solo violin
+  // 慢慢進來、慢慢離開
+  // 比 Piano 柔軟
+      .attack(.45)
+      .release(1.2)
+
+     .gain(.13)
+
+// ==========================================================
+// TRACK 4B - VIOLIN HARMONY
+// ==========================================================
+
+const violinHarmony = n(`
+<
+   [~ 2 4 2 0 ~ 0 2]
+   [~ 3 1 0 ~ 0 1 3]
+   [~ 2 0 ~ 4 0 0 2]
+   [~ 1 0 ~ 0 1 0 ~]
+>
+`)
+    .scale("B3:minor")
+    .s("gm_violin")
+    .attack(.08)
+    .release(.45)
+    .gain(.10)
+
+// ==========================================================
+// SONG SECTIONS
+// ==========================================================
+
+const intro = stack(
+  chords.gain(.20), //intro更安靜
+  strings.gain(.08)
+)
+
+const verse1 = stack(
+  chords.gain(.22),
+  strings.gain(.06),
+  bass.gain(.25),
+  hats.gain(.15)
+)
+
+const verse2 = stack(
+  chords.gain(.23),
+  strings.gain(.09),
+  bass.gain(.28),
+  hats.gain(.17),
+
+  violinHarmony.gain(.05)
+)
+
+const preChorus = stack(
+  chords.gain(.25),
+
+  strings.gain(.16),
+  
+  bass.gain(.30),
+  
+  kick.gain(.55),
+  clap.gain(.22),
+  hats.gain(.15),
+  
+  melodyA.gain(.18)
+)
+
+const chorus1 = stack(
+     chords,
+     strings.gain(.18),
+  
+     kick,
+     clap,
+     hats,
+     bass, 
+    
+     fullMelody,
+
+     violinHarmony
+)
+
+const chorus2 = stack(
+     chords.gain(.32),
+     strings.gain(.22),
+  
+     kick.gain(.85),
+     clap.gain(.48),
+     hats.gain(.20),
+     bass.gain(.42), 
+    
+     fullMelody.gain(.32),
+     violinHarmony.gain(.12)
+)
+
+const bridge = stack(
+  chords.gain(.18),
+  strings.gain(.14),
+
+  bass.gain(.12),
+
+  melodyB.gain(.12)
+)
+
+const finalChorus  = stack(
+  chords.gain(.34),
+  strings.gain(.26),
+
+  kick.gain(.90),
+  clap.gain(.50),
+  hats.gain(.22),
+  bass.gain(.44),
+
+  fullMelody.gain(.34),
+  violinHarmony.gain(.15)
+  
+)
+
+const outro = stack(
+  chords.gain(.17),
+  strings.gain(.10),
+
+  melodyB.gain(.08)
+)
+  
+// ==========================================================
+// SONG STRUCTURE
+//
+// Intro   4 bars
+// Verse   8 bars
+// preChorus   4 bars
+// Chorus  8 bars
+//
+// Energy:
+// ░░░░ → ▒▒▒▒▒▒▒▒ → ▓▓▓▓ → ████████
+// ==========================================================
+arrange(
+  [4, intro],
+  
+  [8, verse1],
+  [4, preChorus],
+  [8, chorus1],
+
+  [8, verse2],
+  [4, preChorus],
+  [8, chorus2],
+
+  [8, bridge],
+
+  [8, finalChorus],
+
+  [4, outro]
+   
+)
